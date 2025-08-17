@@ -1,0 +1,12 @@
+luno-python
+Flask
+gunicorn
+pony
+PyMySQL
+opencv-python
+keras
+requests
+flask-cors
+flask-jwt-extended
+tensorflow
+numpy

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>KuSehat Web 3</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    nav a { margin-right: 15px; cursor: pointer; }
+    section { display: none; }
+    section.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    video.hidden { display: none; }
+    .diagnosis { margin-top: 15px; padding: 10px; border: 1px solid #eee; background-color: #f9f9f9; border-radius: 5px; }
+  </style>
+</head>
+<script>
+  const sectionFromServer = "{{ section|default('pricing') }}";
+  window.onload = function () {
+    showSection(sectionFromServer);
+    {% if user %}
+      const uploadToday = {{ user.exchanges | selectattr('Tanggal.date()', 'equalto', today) | list | length }};
+      document.getElementById("jumlahUpload").textContent = `Upload ke-${uploadToday} dari 3`;
+    {% endif %}
+    getCameras();
+  };
+</script>
+<body>
+
+  <nav>
+    <a onclick="showSection('pricing')">Pricing</a>
+    <a onclick="showSection('login')">Login</a>
+    <a onclick="showSection('register')">Daftar</a>
+    <a onclick="showSection('dashboard')">Dashboard</a>
+    <a onclick="showSection('edituser')">Ganti Data User</a>
+    <a onclick="showSection('topup')">Top Up</a>
+    <a onclick="showSection('exchange')">Tukar Gambar</a>
+    <a onclick="showSection('diseaseprice')">Harga Penukaran</a>
+    {% if user %}
+      <a href="/logout">Logout</a>
+    {% endif %}
+  </nav>
+
+  <section id="pricing" class="active">
+    <h2>Pricing List</h2>
+    <table>
+      <thead>
+        <tr><th>Paket</th><th>Fitur</th><th>Harga</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Basic</td><td>Fitur Deteksi Penyakit melalui kamera</td><td>IDR. 50.000</td></tr>
+        <tr><td>Premium</td><td>1. Fitur Deteksi penyakit melalui kamera,2. Fitur Deteksi penyakit melalui upload gambar</td><td>IDR. 150.000</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="login">
+    <h2>Login</h2>
+    <form action="/login" method="post">
+      <label>Email:</label><br>
+      <input type="email" name="email" required><br><br>
+      <label>Password:</label><br>
+      <input type="password" name="password" required><br><br>
+      <button type="submit">Login</button>
+    </form>
+  </section>
+
+  <section id="register">
+    <h2>Daftar Akun</h2>
+    <form action="/register" method="post">
+      <label>Nama:</label><br>
+      <input type="text" name="nama" required><br><br>
+      <label>Email:</label><br>
+      <input type="email" name="email" required><br><br>
+      <label>Password:</label><br>
+      <input type="password" name="password" required><br><br>
+      <button type="submit">Daftar</button>
+    </form>
+  </section>
+
+  <section id="dashboard">
+{% if user %}
+  <h2>Selamat datang {{ user.NamaUser }}</h2>
+  <p><strong>Saldo Anda:</strong> IDR {{ "%.2f"|format(user.Saldo) }}</p>
+
+  {% set upload_count = user.exchanges | selectattr('Tujuan', 'equalto', 'deteksi') | selectattr('Tanggal.date()', 'equalto', today) | list | length %}
+  {% if user.Saldo >= 150000 or upload_count >= 3 %}
+    <p style="color: green; font-weight: bold;">🛡️ Paket Premium Aktif</p>
+  {% elif upload_count < 3 %}
+    <p style="color: blue; font-weight: bold;">🔰 Paket Basic Aktif</p>
+  {% endif %}
+{% endif %}
+<h3>Riwayat Penukaran Gambar</h3>
+{% if user and user.exchanges %}
+  <table>
+    <thead>
+      <tr>
+        <th>Nama User</th>
+        <th>Tanggal</th>
+        <th>Tujuan</th>
+        <th>Reward</th>
+        <th>Gambar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ex in user.exchanges %}
+        <tr>
+          <td>{{ user.NamaUser }}</td>
+          <td>{{ ex.Tanggal.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td>{{ ex.Tujuan }}</td>
+          <td>IDR {{ "%.2f"|format(ex.SaldoReward) }}</td>
+          <td><img src="{{ url_for('static', filename='uploads/' + ex.Gambar) }}" width="50"></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Belum ada penukaran gambar.</p>
+{% endif %}
+
+<hr>
+<div class="container">
+  <h3>Deteksi Penyakit Kulit dengan AI</h3>
+
+  <p><strong>Pilih metode deteksi:</strong></p>
+    <div class="space-y-3">
+        <div class="flex items-center space-x-2">
+            <label for="camera-select" class="text-sm font-medium">Pilih Kamera:</label>
+            <select id="camera-select" class="flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"></select>
+        </div>
+        <video id="video-preview" playsinline autoplay muted class="w-full rounded-lg bg-gray-200 border hidden"></video>
+        <button id="start-camera-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Mulai Kamera</button>
+        <button id="capture-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 hidden">Ambil & Analisis Gambar</button>
+    </div>
+    <br>
+    <p>Atau unggah gambar:</p>
+  <form method="POST" enctype="multipart/form-data" id="uploadForm" action="/">
+    <input type="hidden" name="method" value="upload">
+    <input type="file" name="image" id="gambarInput" accept="image/*" required><br><br>
+    <button type="submit">Upload dan Diagnosa</button>
+    <p id="jumlahUpload">Upload ke-0 dari 3</p>
+  </form>
+
+  {% if diagnosis %}
+    <hr>
+    <h3>Hasil Diagnosa:</h3>
+    <div class="diagnosis">
+      {{ diagnosis|safe }}
+    </div>
+  {% endif %}
+
+  {% if image_path %}
+    <p><strong>Gambar yang Dideteksi:</strong></p>
+    <img src="{{ url_for('static', filename=image_path.split('static/')[-1]) }}" alt="Hasil Gambar" style="max-width: 300px; margin-top: 10px;">
+  {% endif %}
+</div>
+</section>
+
+  <section id="edituser">
+    {% if user %}
+      <h2>Ganti Data User</h2>
+      <form action="/update_user" method="post">
+        <label>Nama User:</label><br>
+        <input type="text" name="nama" value="{{ user.NamaUser }}" required><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" name="email" value="{{ user.Email }}" required><br><br>
+
+        <label>Password Lama:</label><br>
+        <input type="password" name="old_password" required><br><br>
+
+        <label>Password Baru:</label><br>
+        <input type="password" name="new_password" required><br><br>
+
+        <button type="submit">Perbarui Data</button>
+      </form>
+    {% endif %}
+  </section>
+
+ <section id="topup">
+  <h2>Top Up Saldo Crypto</h2>
+  <form action="/topup" method="post">
+    <label>Jumlah (IDR):</label><br>
+    <input type="number" name="jumlah" required><br><br>
+    <label>Pilih Metode Pembayaran:</label><br>
+    <select name="metode" required>
+      <option value="btc">Bitcoin (BTC)</option>
+      <option value="eth">Ethereum (ETH)</option>
+    </select><br><br>
+    <button type="submit">Kirim</button>
+  </form>
+
+  {% if topup_address %}
+    <h3>🔐 Alamat Deposit:</h3>
+    <p>Silakan kirim aset kripto ke alamat berikut:</p>
+    <code>{{ topup_address }}</code>
+  {% endif %}
+
+  {% if topup_error %}
+    <p style="color:red;">{{ topup_error }}</p>
+  {% endif %}
+</section>
+
+
+  <section id="exchange">
+  <h2>Penukaran Data Gambar Penyakit</h2>
+  <form action="/exchange" method="post" enctype="multipart/form-data">
+    <label for="imageUpload">Upload Gambar Penyakit:</label><br>
+    <input type="file" id="imageUpload" name="image" accept="image/*" required><br><br>
+
+    <label for="tujuanTukar">Pilih Tujuan Penukaran:</label><br>
+    <select id="tujuanTukar" name="tujuan" required>
+      <option value="dokter">Untuk data medis Rumah Sakit</option>
+      <option value="data_ai">Data medis penyakit dan Pelatihan Model Diagnosis AI</option>
+    </select><br><br>
+
+    <button type="submit">Tukar Sekarang</button>
+  </form>
+</section>
+
+
+  <section id="diseaseprice">
+    <h2>List Disease Exchange Price</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Jenis Data</th>
+          <th>Harga Tukar (IDR)</th>
+          <th>Tujuan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gambar Penyakit Kulit Parah seperti Kanker Kulit dan Gambar Penyakit Kelamin Parah Seperti Raja Singa dan Kanker Payudara</td>
+          <td>IDR. 100.000</td>
+          <td>Data medis Rumah Sakit</td>
+        </tr>
+        <tr>
+          <td>Gambar Penyakit Kelamin Parah Seperti Raja Singa dan Kanker Payudara</td>
+          <td>IDR. 200.000</td>
+          <td>Data medis penyakit dan Pelatihan Model Diagnosis AI</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    
+    // Ambil elemen-elemen DOM
+    const video = document.getElementById('video-preview');
+    const cameraSelect = document.getElementById('camera-select');
+    const startCameraBtn = document.getElementById('start-camera-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const gambarInput = document.getElementById('gambarInput');
+    const uploadForm = document.getElementById('uploadForm');
+
+    let currentStream;
+
+    // Fungsi untuk menghentikan stream kamera yang sedang berjalan
+    function stopMediaTracks() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => {
+                track.stop();
+            });
+        }
+    }
+
+    // Mendapatkan daftar kamera yang tersedia
+    async function getCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            cameraSelect.innerHTML = '';
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Kamera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+        } catch (e) {
+            console.error("Tidak bisa mengakses perangkat kamera. Pastikan Anda memberikan izin.");
+        }
+    }
+
+    startCameraBtn.addEventListener('click', async () => {
+        stopMediaTracks();
+        const selectedCameraId = cameraSelect.value;
+        const constraints = {
+            video: {
+                deviceId: selectedCameraId ? { exact: selectedCameraId } : undefined
+            }
+        };
+
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = currentStream;
+            video.classList.remove('hidden');
+            captureBtn.classList.remove('hidden');
+            startCameraBtn.textContent = 'Ganti Kamera';
+        } catch (e) {
+            alert("Gagal memulai kamera. Pastikan izin telah diberikan.");
+            console.error(e);
+        }
+    });
+
+    captureBtn.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob(blob => {
+            const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            gambarInput.files = dataTransfer.files;
+
+            uploadForm.submit();
+        }, 'image/jpeg');
+    });
+
+    let uploadCount = 0;
+    document.getElementById("uploadForm").onsubmit = function (e) {
+      const files = document.getElementById("gambarInput").files;
+      if (uploadCount + files.length > 3) {
+        alert("Batas upload gambar hanya 3.");
+        e.preventDefault();
+      } else {
+        uploadCount += files.length;
+        document.getElementById("jumlahUpload").textContent = `Upload ke-${uploadCount} dari 3`;
+      }
+    }
+  </script>
+</body>
+</html>
