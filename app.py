@@ -58,7 +58,7 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Memuat Model dan Label (dilakukan sekali saat aplikasi dimulai)
 try:
-    model = load_model("model/keras_Model.h5", compile=False)
+    model = load_model("model/keras_model.h5", compile=False)
     with open("model/labels.txt", "r") as f:
         class_names = [line.strip() for line in f.readlines()]
 except Exception as e:
