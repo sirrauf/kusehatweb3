@@ -17,7 +17,7 @@ luno_client = Client(api_key_id=LUNO_API_KEY_ID, api_key_secret=LUNO_API_KEY_SEC
 
 # Database Setup
 db = Database()
-db.bind(provider='mysql', host='localhost', user='root', passwd='', db='kusehat')
+db.bind(provider='mysql', host='localhost', user='kusehatweb3', passwd='Agustus2000', db='kusehatweb3')
 
 class User(db.Entity):
     _table_ = "user"
