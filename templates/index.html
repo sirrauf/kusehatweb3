@@ -13,7 +13,7 @@
     th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
     th { background-color: #f2f2f2; }
     video.hidden { display: none; }
-    .diagnosis { margin-top: 15px; padding: 10px; border: 1px solid #eee; background-color: #f9f9f9; border-radius: 5px; }
+    .diagnosis { margin-top: 15px; padding: 10px; border: 1px solid #eee; background-color: #f9f9f9; border-radius: 5px; white-space: pre-line; }
   </style>
 </head>
 <script>
@@ -189,7 +189,7 @@
       <option value="btc">Bitcoin (BTC)</option>
       <option value="eth">Ethereum (ETH)</option>
     </select><br><br>
-    <button type="submit">Kirim</button>
+    <button type="submit">Top Up</button>
   </form>
 
   {% if topup_address %}
@@ -252,7 +252,6 @@
       document.getElementById(id).classList.add('active');
     }
     
-    // Ambil elemen-elemen DOM
     const video = document.getElementById('video-preview');
     const cameraSelect = document.getElementById('camera-select');
     const startCameraBtn = document.getElementById('start-camera-btn');
@@ -262,7 +261,6 @@
 
     let currentStream;
 
-    // Fungsi untuk menghentikan stream kamera yang sedang berjalan
     function stopMediaTracks() {
         if (currentStream) {
             currentStream.getTracks().forEach(track => {
@@ -271,7 +269,6 @@
         }
     }
 
-    // Mendapatkan daftar kamera yang tersedia
     async function getCameras() {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
