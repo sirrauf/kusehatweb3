@@ -19,7 +19,7 @@ NOTE PENTING: JALANKAN PROYEK INI HARUS KEADAAN INTERNET MENYALA ATAU WIFI MENYA
 Nama anggota tim: Ananda Technology Solution(AnTS Groups)
 
 
-[Video Demo Website KuSehat Web3](https://www.youtube.com/watch?v=fVP2rikjsac)
+[Video Demo Website KuSehat Web3](https://www.youtube.com/watch?v=IAvHF1dgw2o)
 
 # Apa saja yang dibutuhkan:
 1. [Python Version 3.10.11](https://www.python.org/downloads/release/python-31011/)
