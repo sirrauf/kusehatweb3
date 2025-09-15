@@ -1,5 +1,5 @@
-# KuSehat Disease Detection Exchange Web3 Machine Learning Submssion World Hacker Code League
-KuSehat adalah website inovasi teknologi kesehatan yaitu Deteksi Penyakit  menggunakan teknologi modern yaitu AI Gemini, Machine Learning:  Keras,Tensorflow,Numpy,dan Object Real-time Detection: Open CV untuk submission The World Computer Hacker League.
+# KuSehat Disease Detection Exchange Web3 Machine Learning Submssion Vibe Coding Hackthon
+KuSehat adalah website inovasi teknologi kesehatan yaitu Deteksi Penyakit  menggunakan teknologi modern yaitu AI Gemini, Machine Learning:  Keras,Tensorflow,Numpy,dan Object Real-time Detection: Open CV untuk submission Vive Coding Submission.
 
 
 Feature:
@@ -18,11 +18,6 @@ NOTE PENTING: JALANKAN PROYEK INI HARUS KEADAAN INTERNET MENYALA ATAU WIFI MENYA
 
 Nama anggota tim: Ananda Technology Solution(AnTS Groups)
 
-Anggota tim:
-1. Ananda Rauf Maududi sebagai ketua tim Backend dan Ketua tim.
-2. Ruben Hanjrahing Puspito sebagai Front End tim.
-3. Eries Fierza sebagai Back-End tim.
-4. Unggar Madi sebagai Design UI UX tim.
 
 [Video Demo Website KuSehat Web3](https://www.youtube.com/watch?v=fVP2rikjsac)
 
@@ -45,8 +40,7 @@ Anggota tim:
 8. [Download Laragon](https://github.com/leokhoa/laragon/releases/download/6.0.0/laragon-wamp.exe)
 9. Install Laragon dan tambahkan database kusehat di laragon.
 10. Jalankan website KuSehat Python: ketik python app.py
-11. Untuk jalankan Website API Flask dan Website API Motoko, [Buka file Dokumentasi](https://raw.githubusercontent.com/sirrauf/KuSehat-Web3/refs/heads/main/dokumentasi%20Flask%20Motoko.txt).
-12. Selesai
+11. Selesai
 
 
 
