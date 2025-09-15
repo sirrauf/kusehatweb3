@@ -18,7 +18,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 ENABLE_AI = True
-GEMINI_API_KEY = "AIzaSyDb3F5n7dHIHlz9dnUE2rMKh6kXQM8IcB4"   # hardcode API Key
+GEMINI_API_KEY = "AIzaSyBlv6T1_IzO7rTXQKkQ1Y5vpGU08ZFZvyA"   # Gemini API Key
 
 # --- [BARU] Konfigurasi Kunci API Luno ---
 # Ganti dengan Kunci API Luno Anda yang sebenarnya
